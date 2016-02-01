@@ -28,6 +28,6 @@ public class Message {
         return writer.toString();
     }
 	
-	
+	 
 
 }

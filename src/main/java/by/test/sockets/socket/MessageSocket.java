@@ -1,9 +1,7 @@
 package by.test.sockets.socket;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
@@ -19,25 +17,37 @@ import by.test.sockets.socket.encoder.MessageEncoder;
 @ServerEndpoint(value="/messagesocket", encoders = {MessageEncoder.class}, decoders = {MessageDecoder.class})
 public class MessageSocket {
 
-	private static Set<Session> peers = Collections.synchronizedSet(new HashSet<Session>());
+//	private static Set<Session> peers = Collections.synchronizedSet(new HashSet<Session>());
 
+
+	
+	public MessageSocket() {
+	}
+	
+	private static CopyOnWriteArraySet<Session> poolSessions = new CopyOnWriteArraySet<Session>();
+	
 	@OnMessage
-	public void broadcastMessage(Message message, Session session) throws IOException, EncodeException {
-        for (Session peer : peers) {
-            if (!peer.equals(session)) {
-                peer.getBasicRemote().sendObject(message);
+	public void broadcastMessage(Message message, Session sessionUser) throws IOException, EncodeException {
+		System.out.println("broadcastMessage " +sessionUser);
+		System.out.println("broadcastMessage " +message.toString());
+        for (Session session : poolSessions) {
+            if (!session.equals(sessionUser)) {
+            	System.out.println("broadcastMessage "+session.toString());
+            	session.getBasicRemote().sendObject(message);
             }
         }
     }
 
 	@OnOpen
-	public void onOpen(Session peer) {
-		peers.add(peer);
+	public void onOpen(Session session) {
+		System.out.println("onOpen " + session.toString());
+		poolSessions.add(session);
 	}
 
 	@OnClose
-	public void onClose(Session peer) {
-		peers.remove(peer);
+	public void onClose(Session session) {
+		System.out.println("onClose "+ session.toString());
+		poolSessions.remove(session);
 	}
 
 }

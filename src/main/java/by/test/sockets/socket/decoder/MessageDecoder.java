@@ -22,7 +22,7 @@ public class MessageDecoder implements Decoder.Text<Message> {
 	public Message decode(String string) throws DecodeException {
 		JsonObject jsonObject = Json.createReader(new StringReader(string))
 				.readObject();
-		System.out.println("decode" + string);
+		System.out.println("decode " + string);
 		String text = jsonObject.getString("text");
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		Date date = new Date();
@@ -33,6 +33,7 @@ public class MessageDecoder implements Decoder.Text<Message> {
 
 	@Override
 	public boolean willDecode(String string) {
+		System.out.println("willDecode " + string);
 		try {
 			Json.createReader(new StringReader(string)).readObject();
 			return true;
